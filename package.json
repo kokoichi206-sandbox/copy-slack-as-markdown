@@ -1,0 +1,30 @@
+{
+  "name": "copy-slack-as-markdown",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@10.34.4",
+  "scripts": {
+    "dev": "vite build --watch --mode development",
+    "build": "tsc --noEmit && vite build --emptyOutDir",
+    "test": "vitest run",
+    "e2e": "pnpm build && node e2e/verify.mjs",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "pnpm lint && pnpm format:check && pnpm test && pnpm build"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "2.7.1",
+    "@types/chrome": "^0.1.12",
+    "eslint": "10.9.1",
+    "jsdom": "^25.0.1",
+    "playwright": "^1.49.0",
+    "prettier": "^3.3.2",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.69.0",
+    "vite": "6.4.3",
+    "vitest": "3.2.6"
+  }
+}
