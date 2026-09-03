@@ -1,63 +1,71 @@
 # Copy Slack as Markdown
 
-Chrome 120 以降の Slack Web で画面に表示されているメッセージやスレッドを Markdown に変換し、クリップボードへコピーする拡張です。Slack API や OAuth は使いません。
+<div align="right">
 
-## インストール
+English | [日本語](./README.ja.md)
+
+</div>
+
+A Chrome extension that converts visible Slack Web messages and threads to Markdown and copies them to your clipboard. It does not use the Slack API or OAuth.
+
+## Installation
 
 ```sh
 pnpm install
 pnpm build
 ```
 
-Chrome で `chrome://extensions` を開き、『デベロッパー モード』を有効にします。『パッケージ化されていない拡張機能を読み込む』から、このリポジトリの `dist` ディレクトリを選んでください。
+Open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select the `dist` directory in this repository.
 
-## 使い方
+Chrome 120 or later is required.
 
-- メッセージにマウスを重ね、アクション列の『Copy as Markdown』ボタン（`MD`）を押すと、そのメッセージをコピーします。本文を選択してから、その選択を含むメッセージの `MD` を押すと選択範囲だけをコピーします。
-- スレッドパネル上部の『Copy thread as Markdown』を押すと、パネル内に読み込まれている親メッセージと返信をまとめてコピーします。
-- macOSでは、メッセージ内のテキストを選択して `Ctrl+Shift+C` を押しても、選択範囲だけをコピーできます。選択がない場合は、マウスを重ねているかフォーカス中のメッセージが対象です。`Shift+Command+C` とWindows/Linuxの `Ctrl+Shift+C` はChromeの開発者ツールと衝突するため、その他の環境ではMDボタンを使用してください。
-- Slack の入力欄で入力中は発火しません。
+## Usage
 
-出力は `text/plain` の Markdown です。
+- Hover over a message and click the `MD` button labeled **Copy as Markdown** in its action bar. If you select part of that message first, only the selected range is copied.
+- Click **Copy thread as Markdown** at the top of an open thread panel to copy its currently loaded parent message and replies.
+- On macOS, press `Ctrl+Shift+C` to copy selected Slack message text. Without a selection, the hovered or focused message is copied. `Shift+Command+C` and `Ctrl+Shift+C` on Windows and Linux conflict with Chrome DevTools, so use the `MD` button on those platforms.
+- The shortcut is disabled while typing in a Slack input field.
+
+The clipboard output is plain-text Markdown:
 
 ```md
 **alice** · 14:02
-質問本文
+Question
 
 **bob** · 14:05
-返信
+Reply
 
-- 箇条書き
+- List item
 - `code`
 ```
 
-太字、斜体、打ち消し、インラインコード、コードブロック、リンク、リスト、引用、絵文字、メンションの表示名、添付ファイル名を保持します。スレッドが日をまたぐ場合、時刻は `YYYY-MM-DD HH:mm` になります。
+The conversion preserves bold, italic, strikethrough, inline code, code blocks, links, lists, quotes, emoji, displayed mention names, and attachment filenames. Messages from threads spanning multiple dates use `YYYY-MM-DD HH:mm` timestamps.
 
-## 対応範囲
+## Scope
 
-- 対象は `https://app.slack.com/*` のみです。
-- 開いている画面の DOM だけを読みます。未ロードの返信を自動取得しません。
-- Slack Desktop、モバイル、ワークスペース全体のエクスポートには対応しません。
-- 添付ファイルの中身はダウンロードしません。
-- Slack の DOM が変わると動かなくなる可能性があります。コピーに失敗した場合は画面上のトーストとコンソールに理由を出します。
+- Runs only on `https://app.slack.com/*`.
+- Reads only the DOM currently loaded in the open page. It does not automatically load unseen replies.
+- Does not support Slack Desktop, mobile apps, or full-workspace exports.
+- Does not download attachment contents.
+- Slack DOM changes may break extraction. Copy failures are reported through an on-screen toast and the browser console.
 
-## 権限とデータの扱い
+## Permissions and privacy
 
-`clipboardWrite` 権限は、MDボタンまたはショートカットを操作したときのクリップボード書き込みに使います。`content_scripts.matches` で `https://app.slack.com/*` にだけ拡張を読み込み、追加のホスト権限は要求しません。
+The `clipboardWrite` permission is used only when you activate the `MD` button or shortcut. The content script is limited to `https://app.slack.com/*`, with no additional host permissions.
 
-外部サーバーへの送信、解析、ログ収集は行いません。メッセージの変換処理はブラウザ内で完結します。
+The extension does not send data to external servers, collect analytics, or log message contents. All conversion runs locally in the browser.
 
-## 開発
+## Development
 
 ```sh
 pnpm exec playwright install chromium
-pnpm dev          # 変更を監視して dist を再ビルド
-pnpm check        # lint、format、unit test、build
-pnpm e2e          # Chromium に dist を読み込んだ fixture E2E
+pnpm dev          # Watch for changes and rebuild dist
+pnpm check        # Run lint, formatting, unit tests, and build
+pnpm e2e          # Load dist in Chromium and run fixture E2E checks
 ```
 
-メッセージの特定と値の抽出は `src/slack-dom.ts`、本文内の rich text 変換は `src/markdown.ts`、選択範囲の抽出は `src/selection.ts` にまとめています。DOM 変更へ追従するときは、対象モジュールとfixtureを同時に更新してください。
+Slack message lookup and extraction live in `src/slack-dom.ts`, rich-text conversion in `src/markdown.ts`, and selected-range handling in `src/selection.ts`. When adapting to Slack DOM changes, update the relevant module and its fixture together.
 
 ## License
 
-MIT
+[MIT](./LICENSE)
