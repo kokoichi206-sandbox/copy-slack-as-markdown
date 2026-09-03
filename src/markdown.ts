@@ -181,7 +181,7 @@ function listIndentDepth(element: Element, context: SerializeContext): number {
     previousIndentAttribute !== null &&
     Number.isInteger(previousIndent) &&
     previousIndent >= 0
-      ? previousIndent + 1
+      ? listIndentDepth(previousList, context) + 1
       : context.listDepth + 1;
   return Math.min(declaredIndent, maximumIndent);
 }
