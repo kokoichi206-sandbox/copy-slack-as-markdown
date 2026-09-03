@@ -159,31 +159,52 @@ function isBulletList(element: Element): boolean {
   );
 }
 
-function listIndentDepth(element: Element, context: SerializeContext): number {
+function declaredListIndent(element: Element): number | null {
   const declaredIndentAttribute = element.getAttribute("data-indent");
-  if (declaredIndentAttribute === null) return context.listDepth;
+  if (declaredIndentAttribute === null) return null;
   const declaredIndent = Number(declaredIndentAttribute);
-  if (!Number.isInteger(declaredIndent) || declaredIndent < 0) {
-    return context.listDepth;
-  }
+  return Number.isInteger(declaredIndent) && declaredIndent >= 0
+    ? declaredIndent
+    : null;
+}
 
+function previousSiblingList(element: Element): Element | null {
   const previousList = element.previousElementSibling;
-  if (
-    previousList === null ||
-    (previousList.tagName !== "UL" && previousList.tagName !== "OL")
-  ) {
-    return Math.min(declaredIndent, context.listDepth);
-  }
+  return previousList !== null &&
+    (previousList.tagName === "UL" || previousList.tagName === "OL")
+    ? previousList
+    : null;
+}
 
-  const previousIndentAttribute = previousList.getAttribute("data-indent");
-  const previousIndent = Number(previousIndentAttribute);
-  const maximumIndent =
-    previousIndentAttribute !== null &&
-    Number.isInteger(previousIndent) &&
-    previousIndent >= 0
-      ? listIndentDepth(previousList, context) + 1
-      : context.listDepth + 1;
-  return Math.min(declaredIndent, maximumIndent);
+function minimumDeclaredListIndent(
+  element: Element,
+  context: SerializeContext,
+): number {
+  let minimumIndent = declaredListIndent(element) ?? context.listDepth;
+  let previousList = previousSiblingList(element);
+  while (previousList !== null) {
+    minimumIndent = Math.min(
+      minimumIndent,
+      declaredListIndent(previousList) ?? context.listDepth,
+    );
+    previousList = previousSiblingList(previousList);
+  }
+  return minimumIndent;
+}
+
+function listIndentDepth(element: Element, context: SerializeContext): number {
+  const declaredIndent = declaredListIndent(element);
+  if (declaredIndent === null) return context.listDepth;
+  const previousList = previousSiblingList(element);
+  if (previousList === null) return context.listDepth;
+
+  const relativeIndent =
+    context.listDepth - minimumDeclaredListIndent(element, context);
+  const declaredRelativeDepth = declaredIndent + relativeIndent;
+  return Math.min(
+    declaredRelativeDepth,
+    listIndentDepth(previousList, context) + 1,
+  );
 }
 
 function serializeList(element: Element, context: SerializeContext): string {
