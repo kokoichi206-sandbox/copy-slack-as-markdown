@@ -105,6 +105,16 @@ describe("slackRichTextToMarkdown", () => {
         '<ul data-indent="1"><li>child</li></ul><ul data-indent="3"><li>clamped grandchild</li></ul><ul data-indent="2"><li>grandchild sibling</li></ul>',
       ),
     ).toBe("- child\n    - clamped grandchild\n    - grandchild sibling");
+    expect(
+      markdown(
+        '<ul data-indent="0"><li>root</li></ul><ul data-indent="2"><li>child</li></ul><ul data-indent="2"><li>child sibling</li></ul>',
+      ),
+    ).toBe("- root\n    - child\n    - child sibling");
+    expect(
+      markdown(
+        '<ul data-indent="0"><li>root</li></ul><ul data-indent="2"><li>child</li></ul><ul data-indent="3"><li>grandchild</li></ul><ul data-indent="2"><li>next child</li></ul>',
+      ),
+    ).toBe("- root\n    - child\n        - grandchild\n    - next child");
   });
 
   it("コードブロック内の空行と行末空白を変えない", () => {

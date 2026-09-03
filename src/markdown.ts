@@ -176,35 +176,32 @@ function previousSiblingList(element: Element): Element | null {
     : null;
 }
 
-function minimumDeclaredListIndent(
+function nearestPreviousShallowerList(
   element: Element,
+  declaredIndent: number,
   context: SerializeContext,
-): number {
-  let minimumIndent = declaredListIndent(element) ?? context.listDepth;
+): Element | null {
   let previousList = previousSiblingList(element);
   while (previousList !== null) {
-    minimumIndent = Math.min(
-      minimumIndent,
-      declaredListIndent(previousList) ?? context.listDepth,
-    );
+    const previousDeclaredIndent =
+      declaredListIndent(previousList) ?? context.listDepth;
+    if (previousDeclaredIndent < declaredIndent) return previousList;
     previousList = previousSiblingList(previousList);
   }
-  return minimumIndent;
+  return null;
 }
 
 function listIndentDepth(element: Element, context: SerializeContext): number {
   const declaredIndent = declaredListIndent(element);
   if (declaredIndent === null) return context.listDepth;
-  const previousList = previousSiblingList(element);
-  if (previousList === null) return context.listDepth;
-
-  const relativeIndent =
-    context.listDepth - minimumDeclaredListIndent(element, context);
-  const declaredRelativeDepth = declaredIndent + relativeIndent;
-  return Math.min(
-    declaredRelativeDepth,
-    listIndentDepth(previousList, context) + 1,
+  const shallowerList = nearestPreviousShallowerList(
+    element,
+    declaredIndent,
+    context,
   );
+  return shallowerList === null
+    ? context.listDepth
+    : listIndentDepth(shallowerList, context) + 1;
 }
 
 function serializeList(element: Element, context: SerializeContext): string {
