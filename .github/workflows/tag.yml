@@ -1,0 +1,43 @@
+name: Create release tag
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      tag: ${{ steps.create.outputs.tag }}
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      # GITHUB_TOKEN で push したタグは別の workflow を起動しないため、release job から直接呼び出す。
+      - name: Verify package version
+        run: node scripts/verify-extension-version.mjs --package-only
+
+      - name: Create and push tag
+        id: create
+        run: |
+          EXTENSION_VERSION=$(node -p "require('./package.json').version")
+          RELEASE_TAG="v${EXTENSION_VERSION}"
+          if git rev-parse --verify --quiet "refs/tags/${RELEASE_TAG}"; then
+            echo "::error::Tag ${RELEASE_TAG} already exists"
+            exit 1
+          fi
+          git tag "$RELEASE_TAG"
+          git push origin "$RELEASE_TAG"
+          echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+
+  release:
+    needs: tag
+    uses: ./.github/workflows/release.yml
+    with:
+      tag: ${{ needs.tag.outputs.tag }}

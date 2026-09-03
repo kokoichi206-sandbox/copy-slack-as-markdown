@@ -68,6 +68,12 @@ pnpm e2e          # Load dist in Chromium and run fixture E2E checks
 
 Slack message lookup and extraction live in `src/slack-dom.ts`, rich-text conversion in `src/markdown.ts`, and selected-range handling in `src/selection.ts`. When adapting to Slack DOM changes, update the relevant module and its fixture together.
 
+## Release
+
+Use `package.json` as the extension version source. After a version bump is merged into `main`, run the **Create release tag** workflow. It creates the matching `v*` tag and a GitHub Release containing a Chrome Web Store-ready ZIP. CI also stores the built extension as a versioned workflow artifact.
+
+Chrome Web Store publishing is intentionally separate from the GitHub release workflow.
+
 ## License
 
 [MIT](./LICENSE)
