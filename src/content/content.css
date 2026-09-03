@@ -1,0 +1,75 @@
+.csm-copy-message-button {
+  box-sizing: border-box;
+  min-width: 32px;
+  height: 28px;
+  padding: 0 6px;
+  border: 0;
+  border-left: 1px solid var(--saf-0, rgba(29, 28, 29, 0.13));
+  border-radius: 0 4px 4px 0;
+  color: rgb(var(--sk_primary_foreground, 29, 28, 29));
+  background: rgb(var(--sk_primary_background, 255, 255, 255));
+  font:
+    700 11px/28px Slack-Lato,
+    Slack-Fractions,
+    appleLogo,
+    sans-serif;
+  cursor: pointer;
+}
+
+.csm-copy-message-button:hover,
+.csm-copy-message-button:focus-visible {
+  color: rgb(var(--sk_highlight, 18, 100, 163));
+  background: var(--sk_foreground_min_solid, #f8f8f8);
+  outline: 2px solid rgb(var(--sk_highlight, 18, 100, 163));
+  outline-offset: 1px;
+}
+
+.csm-copy-thread-button {
+  margin-left: auto;
+  padding: 4px 10px;
+  border: 1px solid var(--saf-0, rgba(29, 28, 29, 0.3));
+  border-radius: 4px;
+  color: rgb(var(--sk_primary_foreground, 29, 28, 29));
+  background: rgb(var(--sk_primary_background, 255, 255, 255));
+  font:
+    700 12px/20px Slack-Lato,
+    Slack-Fractions,
+    appleLogo,
+    sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.csm-copy-thread-button:hover,
+.csm-copy-thread-button:focus-visible {
+  border-color: rgb(var(--sk_highlight, 18, 100, 163));
+  color: rgb(var(--sk_highlight, 18, 100, 163));
+  outline: 2px solid rgb(var(--sk_highlight, 18, 100, 163));
+  outline-offset: 1px;
+}
+
+.csm-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 2147483647;
+  max-width: 420px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  color: #ffffff;
+  font:
+    700 14px/20px Slack-Lato,
+    Slack-Fractions,
+    appleLogo,
+    sans-serif;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.24);
+  pointer-events: none;
+}
+
+.csm-toast--success {
+  background: #007a5a;
+}
+
+.csm-toast--error {
+  background: #e01e5a;
+}
