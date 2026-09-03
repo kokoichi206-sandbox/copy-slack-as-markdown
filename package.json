@@ -9,11 +9,13 @@
     "dev": "vite build --watch --mode development",
     "build": "tsc --noEmit && vite build --emptyOutDir",
     "test": "vitest run",
-    "e2e": "pnpm build && node e2e/verify.mjs",
+    "e2e": "pnpm build && pnpm e2e:run",
+    "e2e:run": "node e2e/verify.mjs",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "pnpm lint && pnpm format:check && pnpm test && pnpm build"
+    "verify:version": "node scripts/verify-extension-version.mjs",
+    "check": "pnpm lint && pnpm format:check && pnpm test && pnpm build && pnpm verify:version"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "2.7.1",

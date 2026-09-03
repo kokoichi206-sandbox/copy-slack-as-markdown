@@ -1,0 +1,72 @@
+name: Create GitHub release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Resolve release tag
+        id: release-tag
+        env:
+          CALLED_TAG: ${{ inputs.tag }}
+          PUSHED_TAG: ${{ github.ref_name }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "workflow_call" ]; then
+            RELEASE_TAG="$CALLED_TAG"
+          else
+            RELEASE_TAG="$PUSHED_TAG"
+          fi
+          echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.release-tag.outputs.tag }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Verify release version
+        env:
+          RELEASE_TAG: ${{ steps.release-tag.outputs.tag }}
+        run: node scripts/verify-extension-version.mjs "$RELEASE_TAG"
+
+      # Chrome Web Store が要求する manifest.json を ZIP 直下に置き、ビルド用メタデータは含めない。
+      - name: Create extension zip
+        env:
+          RELEASE_TAG: ${{ steps.release-tag.outputs.tag }}
+        run: |
+          cd dist
+          zip -r "../copy-slack-as-markdown-${RELEASE_TAG}.zip" . -x '.vite/*'
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release-tag.outputs.tag }}
+          generate_release_notes: true
+          files: copy-slack-as-markdown-${{ steps.release-tag.outputs.tag }}.zip

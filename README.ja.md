@@ -66,6 +66,12 @@ pnpm e2e          # Chromium に dist を読み込んだ fixture E2E
 
 メッセージの特定と値の抽出は `src/slack-dom.ts`、本文内の rich text 変換は `src/markdown.ts`、選択範囲の抽出は `src/selection.ts` にまとめています。DOM 変更へ追従するときは、対象モジュールと fixture を同時に更新してください。
 
+## リリース
+
+拡張機能のバージョンは `package.json` で管理します。バージョン更新を `main` にマージしたあと、GitHub Actions の **Create release tag** を実行してください。対応する `v*` タグが作成され、Chrome Web Store に提出できる ZIP が GitHub Release に添付されます。CI でも、ビルド済みの拡張機能をバージョン付きArtifactとして保存します。
+
+Chrome Web Store への公開処理は、GitHub Release の作成とは分離しています。
+
 ## ライセンス
 
 [MIT](./LICENSE)

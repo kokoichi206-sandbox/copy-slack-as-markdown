@@ -2,9 +2,15 @@ name: CI
 
 on:
   pull_request:
+    branches:
+      - main
   push:
     branches:
       - main
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -12,21 +18,41 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: pnpm
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
+
       - name: Check
         run: pnpm check
+
       - name: E2E
-        run: pnpm e2e
+        run: pnpm e2e:run
+
+      - name: Read extension version
+        id: extension-version
+        run: |
+          EXTENSION_VERSION=$(node -p "require('./package.json').version")
+          echo "version=$EXTENSION_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Upload extension
+        uses: actions/upload-artifact@v4
+        with:
+          name: copy-slack-as-markdown-v${{ steps.extension-version.outputs.version }}
+          path: dist/
+          if-no-files-found: error
