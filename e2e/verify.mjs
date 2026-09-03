@@ -752,6 +752,20 @@ try {
     )) === "untouched",
   );
 
+  await page.evaluate(() => {
+    document.querySelector('[data-item-key="message-reply"]')?.remove();
+    document.querySelector('[data-item-key="message-compact-reply"]')?.remove();
+  });
+  await page.getByRole("button", { name: "Copy thread as Markdown" }).click();
+  const singleMessageThreadToast = page.locator(
+    '.csm-toast--success:has-text("Copied 1 message as Markdown")',
+  );
+  await singleMessageThreadToast.waitFor();
+  recordAssertion(
+    "1件だけのスレッドコピーでは message を単数形にする",
+    (await singleMessageThreadToast.count()) === 1,
+  );
+
   recordAssertion(
     "拡張から外部ネットワークリクエストを送らない",
     unexpectedRequests.length === 0,

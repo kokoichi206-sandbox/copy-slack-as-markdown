@@ -27,6 +27,11 @@ function escapeMarkdownText(text: string, atLineStart: boolean): string {
     .replace(/</g, "\\<");
   if (!atLineStart) return escapedInlineText;
   return escapedInlineText
+    .replace(
+      /^([ \t]{0,3})(~{3,})/,
+      (_match, indent: string, run: string) =>
+        `${indent}${run.replaceAll("~", "\\~")}`,
+    )
     .replace(/^([ \t]{0,3})#(?=\s)/, "$1\\#")
     .replace(/^([ \t]{0,3})([>+-])(?=\s)/, "$1\\$2")
     .replace(/^([ \t]{0,3})>/, "$1\\>")
@@ -154,6 +159,30 @@ function isBulletList(element: Element): boolean {
   );
 }
 
+function listIndentDepth(element: Element, context: SerializeContext): number {
+  const declaredIndentAttribute = element.getAttribute("data-indent");
+  if (declaredIndentAttribute === null) return context.listDepth;
+  const declaredIndent = Number(declaredIndentAttribute);
+  if (!Number.isInteger(declaredIndent) || declaredIndent < 0) {
+    return context.listDepth;
+  }
+
+  const previousList = element.previousElementSibling;
+  if (
+    previousList === null ||
+    (previousList.tagName !== "UL" && previousList.tagName !== "OL")
+  ) {
+    return Math.min(declaredIndent, context.listDepth);
+  }
+
+  const previousIndent = Number(previousList.getAttribute("data-indent"));
+  const maximumIndent =
+    Number.isInteger(previousIndent) && previousIndent >= 0
+      ? previousIndent + 1
+      : context.listDepth;
+  return Math.min(declaredIndent, maximumIndent);
+}
+
 function serializeList(element: Element, context: SerializeContext): string {
   const listItems = [...element.children].filter(
     (child) => child.tagName === "LI",
@@ -181,16 +210,7 @@ function serializeList(element: Element, context: SerializeContext): string {
           .trimEnd(),
       )
       .join("\n");
-    const declaredIndent = element.getAttribute("data-indent");
-    const parsedIndent =
-      declaredIndent === null ? null : Number(declaredIndent);
-    const indent = "    ".repeat(
-      parsedIndent !== null &&
-        Number.isInteger(parsedIndent) &&
-        parsedIndent >= 0
-        ? parsedIndent
-        : context.listDepth,
-    );
+    const indent = "    ".repeat(listIndentDepth(element, context));
     const orderedStart =
       element instanceof HTMLOListElement ? element.start : 1;
     const marker = bullet ? "-" : `${orderedStart + index}.`;

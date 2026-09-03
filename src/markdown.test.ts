@@ -75,6 +75,18 @@ describe("slackRichTextToMarkdown", () => {
     ).toBe("- parent\n    - child");
   });
 
+  it("data-indent が飛んでも直前の可視リストから1段だけ字下げする", () => {
+    expect(
+      markdown(`
+        <ul data-indent="0"><li>parent</li></ul>
+        <ul data-indent="2"><li>child</li></ul>
+      `),
+    ).toBe("- parent\n    - child");
+    expect(markdown('<ul data-indent="2"><li>selected child</li></ul>')).toBe(
+      "- selected child",
+    );
+  });
+
   it("コードブロック内の空行と行末空白を変えない", () => {
     expect(markdown("<pre>first  \n\n\nlast</pre>")).toBe(
       "```\nfirst  \n\n\nlast\n```",
@@ -171,5 +183,9 @@ describe("slackRichTextToMarkdown", () => {
     expect(markdown("~100~200 ~/Library ~~old~~")).toBe(
       "\\~100\\~200 ~/Library \\~\\~old\\~\\~",
     );
+  });
+
+  it("行頭のチルダ3個以上をコードフェンスにしない", () => {
+    expect(markdown("~~~js<br>after")).toBe("\\~\\~\\~js\nafter");
   });
 });

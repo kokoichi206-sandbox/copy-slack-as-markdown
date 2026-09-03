@@ -171,9 +171,10 @@ async function copyThreadMessages(
       );
 
     const messages = messageElements.map(extractSlackMessage);
+    const messageNoun = messages.length === 1 ? "message" : "messages";
     await writeMarkdown(
       formatSlackMessages(messages),
-      `Copied ${messages.length} messages as Markdown`,
+      `Copied ${messages.length} ${messageNoun} as Markdown`,
     );
   } catch (error) {
     console.error("[Copy Slack as Markdown] Thread copy failed", error);
