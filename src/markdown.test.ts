@@ -142,4 +142,8 @@ describe("slackRichTextToMarkdown", () => {
       ),
     ).toBe("[a\\]b](https://example.com/docs) unsafe");
   });
+
+  it("空白のない引用記号・区切り線・setext 見出しをエスケープする", () => {
+    expect(markdown("&gt;quote<br>---<br>===")).toBe("\\>quote\n\\---\n\\===");
+  });
 });

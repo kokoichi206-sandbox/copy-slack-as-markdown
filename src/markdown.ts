@@ -24,6 +24,8 @@ function escapeMarkdownText(text: string): string {
     .replace(/</g, "\\<")
     .replace(/(^|\n)([ \t]{0,3})#(?=\s)/g, "$1$2\\#")
     .replace(/(^|\n)([ \t]{0,3})([>+-])(?=\s)/g, "$1$2\\$3")
+    .replace(/(^|\n)([ \t]{0,3})>/g, "$1$2\\>")
+    .replace(/(^|\n)([ \t]{0,3})(-{3,}|=+)(?=[ \t]*(?:\n|$))/g, "$1$2\\$3")
     .replace(/(^|\n)([ \t]{0,3})(\d+)([.)])(?=\s)/g, "$1$2$3\\$4");
 }
 
@@ -168,6 +170,7 @@ function serializeLink(
 }
 
 export function safeMarkdownLinkUrl(url: string): string | null {
+  if (!URL.canParse(url)) return null;
   const protocol = new URL(url).protocol;
   if (protocol !== "http:" && protocol !== "https:") return null;
   return url.replace(/\s/g, "%20").replace(/\(/g, "%28").replace(/\)/g, "%29");

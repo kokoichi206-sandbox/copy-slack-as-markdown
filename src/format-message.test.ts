@@ -75,9 +75,12 @@ describe("formatSlackMessages", () => {
     expect(
       formatSlackMessages([
         message({
-          attachments: [{ name: "report.pdf", url: "javascript:alert(1)" }],
+          attachments: [
+            { name: "report.pdf", url: "javascript:alert(1)" },
+            { name: "broken.pdf", url: "https://[invalid" },
+          ],
         }),
       ]),
-    ).toBe("**alice** · 14:02\nQuestion\n📎 report.pdf");
+    ).toBe("**alice** · 14:02\nQuestion\n📎 report.pdf\n📎 broken.pdf");
   });
 });

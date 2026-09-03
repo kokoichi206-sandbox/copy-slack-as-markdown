@@ -262,6 +262,12 @@ export function findOpenThreadPane(
 }
 
 export function findThreadHeader(pane: HTMLElement): HTMLElement | null {
-  const header = queryFirstByPriority(pane, THREAD_HEADER_SELECTORS);
-  return header instanceof HTMLElement ? header : null;
+  for (const selector of THREAD_HEADER_SELECTORS) {
+    for (const header of pane.querySelectorAll<HTMLElement>(selector)) {
+      if (!header.hidden && header.getAttribute("aria-hidden") !== "true") {
+        return header;
+      }
+    }
+  }
+  return null;
 }

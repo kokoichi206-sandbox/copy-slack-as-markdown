@@ -5,6 +5,7 @@ import {
   findMessageElements,
   findMessageActions,
   findOpenThreadPane,
+  findThreadHeader,
   MESSAGE_ACTIONS_SELECTOR,
   SlackDomError,
 } from "./slack-dom";
@@ -220,5 +221,17 @@ describe("Slack DOM adapter", () => {
       document.querySelector('[data-qa="message_container"]') as HTMLElement,
     );
     expect(message.attachments).toEqual([{ name: "report.pdf", url: null }]);
+  });
+
+  it("明示的に非表示のスレッドヘッダを注入先にしない", () => {
+    document.body.innerHTML = `
+      <aside data-qa="threads_flexpane">
+        <header class="p-flexpane_header" hidden>old</header>
+        <header class="p-flexpane_header" id="visible-header">current</header>
+      </aside>`;
+
+    const pane = findOpenThreadPane();
+    if (pane === null) throw new Error("thread fixture is invalid");
+    expect(findThreadHeader(pane)?.id).toBe("visible-header");
   });
 });

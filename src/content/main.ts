@@ -20,6 +20,7 @@ const TOAST_CLASS = "csm-toast";
 let hoveredMessage: HTMLElement | null = null;
 let scanScheduled = false;
 const pendingScanRoots = new Set<Element>();
+let toastRemovalTimer: number | null = null;
 
 function createMessageButton(): HTMLButtonElement {
   const button = document.createElement("button");
@@ -41,6 +42,21 @@ function createThreadButton(): HTMLButtonElement {
   button.dataset.csmIgnore = "true";
   return button;
 }
+
+function createToastRegion(kind: "success" | "error"): HTMLDivElement {
+  const toast = document.createElement("div");
+  toast.className = `${TOAST_CLASS} ${TOAST_CLASS}--${kind}`;
+  toast.setAttribute("role", kind === "error" ? "alert" : "status");
+  toast.setAttribute("aria-atomic", "true");
+  toast.dataset.csmIgnore = "true";
+  document.body.appendChild(toast);
+  return toast;
+}
+
+const toastRegions = {
+  success: createToastRegion("success"),
+  error: createToastRegion("error"),
+};
 
 function injectMessageButton(message: HTMLElement): void {
   const actions = findMessageActions(message);
@@ -101,13 +117,14 @@ function scheduleScan(root: Element): void {
 }
 
 function showToast(message: string, kind: "success" | "error"): void {
-  document.querySelector(`.${TOAST_CLASS}`)?.remove();
-  const toast = document.createElement("div");
-  toast.className = `${TOAST_CLASS} ${TOAST_CLASS}--${kind}`;
-  toast.setAttribute("role", kind === "error" ? "alert" : "status");
-  toast.textContent = message;
-  document.body.appendChild(toast);
-  window.setTimeout(() => toast.remove(), 2400);
+  if (toastRemovalTimer !== null) window.clearTimeout(toastRemovalTimer);
+  toastRegions.success.textContent = "";
+  toastRegions.error.textContent = "";
+  toastRegions[kind].textContent = message;
+  toastRemovalTimer = window.setTimeout(() => {
+    toastRegions[kind].textContent = "";
+    toastRemovalTimer = null;
+  }, 2400);
 }
 
 function readableError(error: unknown): string {
@@ -252,6 +269,13 @@ document.addEventListener("keydown", (event) => {
 
 new MutationObserver((records) => {
   for (const record of records) {
+    if (
+      record.removedNodes.length > 0 &&
+      record.target instanceof Element &&
+      record.target.closest("[data-csm-ignore]") === null
+    ) {
+      scheduleScan(record.target);
+    }
     for (const addedNode of record.addedNodes) {
       if (addedNode instanceof Element) {
         if (addedNode.matches("[data-csm-ignore]")) continue;

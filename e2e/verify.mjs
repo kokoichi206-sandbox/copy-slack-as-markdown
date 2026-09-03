@@ -1,11 +1,14 @@
 import { chromium } from "playwright";
-import { mkdtempSync } from "node:fs";
+import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
 const extensionPath = resolve("dist");
 const fixtureUrl = "https://app.slack.com/client/test/thread";
 const failures = [];
+const manifest = JSON.parse(
+  readFileSync(resolve(extensionPath, "manifest.json"), "utf8"),
+);
 
 const recordAssertion = (name, passed, detail = "") => {
   console.log(
@@ -114,15 +117,9 @@ return a;</pre><div class="p-rich_text_section">Code tail</div></div></div>
         if (event.currentTarget.dataset.replacementScheduled === 'true') return;
         event.currentTarget.dataset.replacementScheduled = 'true';
         const actions = event.currentTarget.querySelector('.c-message_actions__container');
-        const removeInjectedButton = () =>
-          actions.querySelector('.csm-copy-message-button')?.remove();
-        const slackRerender = new MutationObserver(removeInjectedButton);
-        slackRerender.observe(actions, { childList: true });
-        removeInjectedButton();
         setTimeout(() => {
-          slackRerender.disconnect();
-          actions.appendChild(document.createTextNode(''));
-        }, 650);
+          actions.querySelector('.csm-copy-message-button')?.remove();
+        }, 50);
       });
     </script>
   </body>
@@ -139,6 +136,11 @@ const context = await chromium.launchPersistentContext(
       `--load-extension=${extensionPath}`,
     ],
   },
+);
+
+recordAssertion(
+  "生成 Manifest に追加権限を含めない",
+  manifest.permissions === undefined && manifest.host_permissions === undefined,
 );
 
 try {
@@ -197,7 +199,7 @@ try {
   );
 
   await page.locator("#replaced-actions-message").hover();
-  await page.waitForTimeout(700);
+  await page.waitForTimeout(150);
   const replacedActionsButtonCount = await page
     .locator("#replaced-actions-message .csm-copy-message-button")
     .count();
@@ -260,7 +262,7 @@ try {
     "読めない項目があるスレッドは一部コピーせず失敗を表示する",
     (await page.evaluate(() => navigator.clipboard.readText())) ===
       "thread untouched" &&
-      (await page.locator(".csm-toast--error").count()) === 1,
+      (await page.locator(".csm-toast--error:not(:empty)").count()) === 1,
   );
 
   await page
@@ -710,7 +712,7 @@ try {
   await page.locator("#unreadable-message .csm-copy-message-button").click();
   recordAssertion(
     "単一メッセージを読めないときは失敗トーストを表示する",
-    (await page.locator(".csm-toast--error").count()) === 1,
+    (await page.locator(".csm-toast--error:not(:empty)").count()) === 1,
   );
 
   recordAssertion(

@@ -66,6 +66,10 @@
   pointer-events: none;
 }
 
+.csm-toast:empty {
+  display: none;
+}
+
 .csm-toast--success {
   background: #007a5a;
 }

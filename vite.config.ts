@@ -8,7 +8,6 @@ const manifest = defineManifest({
   name: "Copy Slack as Markdown",
   description: "Copy visible Slack Web messages and threads as Markdown.",
   version: pkg.version,
-  permissions: ["clipboardWrite"],
   content_scripts: [
     {
       matches: ["https://app.slack.com/*"],
