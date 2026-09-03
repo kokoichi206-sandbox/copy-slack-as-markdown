@@ -17,21 +17,71 @@ const BLOCK_TAGS = new Set([
   "SECTION",
 ]);
 
-function escapeMarkdownText(text: string): string {
-  return text
+function escapeMarkdownText(text: string, atLineStart: boolean): string {
+  const escapedInlineText = text
     .replace(/([\\`*_])/g, "\\$1")
     .replace(/~~/g, "\\~\\~")
-    .replace(/</g, "\\<")
-    .replace(/(^|\n)([ \t]{0,3})#(?=\s)/g, "$1$2\\#")
-    .replace(/(^|\n)([ \t]{0,3})([>+-])(?=\s)/g, "$1$2\\$3")
-    .replace(/(^|\n)([ \t]{0,3})>/g, "$1$2\\>")
-    .replace(/(^|\n)([ \t]{0,3})(-{3,}|=+)(?=[ \t]*(?:\n|$))/g, "$1$2\\$3")
-    .replace(/(^|\n)([ \t]{0,3})(\d+)([.)])(?=\s)/g, "$1$2$3\\$4");
+    .replace(/</g, "\\<");
+  if (!atLineStart) return escapedInlineText;
+  return escapedInlineText
+    .replace(/^([ \t]{0,3})#(?=\s)/, "$1\\#")
+    .replace(/^([ \t]{0,3})([>+-])(?=\s)/, "$1\\$2")
+    .replace(/^([ \t]{0,3})>/, "$1\\>")
+    .replace(/^([ \t]{0,3})(-+|=+)(?=[ \t]*$)/, "$1\\$2")
+    .replace(/^([ \t]{0,3})(\d+)([.)])(?=\s)/, "$1$2\\$3");
 }
 
-function normalizeTextNode(text: string): string {
+function serializesAsBlock(element: Element): boolean {
+  return (
+    BLOCK_TAGS.has(element.tagName) ||
+    element.classList.contains("p-rich_text_section") ||
+    ["BLOCKQUOTE", "OL", "PRE", "UL"].includes(element.tagName)
+  );
+}
+
+function startsRenderedLine(textNode: Text): boolean {
+  let current: Node = textNode;
+  while (current.parentNode instanceof Element) {
+    let previous = current.previousSibling;
+    while (previous !== null) {
+      if (previous instanceof HTMLBRElement) return true;
+      if (
+        previous instanceof Element &&
+        previous.getAttribute("data-stringify-type") === "paragraph-break"
+      ) {
+        return true;
+      }
+      if (
+        previous instanceof Element &&
+        previous.matches('[aria-hidden="true"], [data-csm-ignore]')
+      ) {
+        previous = previous.previousSibling;
+        continue;
+      }
+      if (
+        previous instanceof Text &&
+        previous.textContent?.trim() === "" &&
+        previous.textContent.includes("\n")
+      ) {
+        previous = previous.previousSibling;
+        continue;
+      }
+      return previous instanceof Element && serializesAsBlock(previous);
+    }
+    const parent = current.parentNode;
+    if (serializesAsBlock(parent)) return true;
+    current = parent;
+  }
+  return true;
+}
+
+function normalizeTextNode(textNode: Text): string {
+  const text = textNode.textContent;
   if (text.trim() === "" && text.includes("\n")) return "";
-  return escapeMarkdownText(text.replace(/\u00a0/g, " ").replace(/\s+/g, " "));
+  return escapeMarkdownText(
+    text.replace(/\u00a0/g, " ").replace(/\s+/g, " "),
+    startsRenderedLine(textNode),
+  );
 }
 
 function serializeChildren(node: Node, context: SerializeContext): string {
@@ -177,8 +227,7 @@ export function safeMarkdownLinkUrl(url: string): string | null {
 }
 
 function serializeNode(node: Node, context: SerializeContext): string {
-  if (node.nodeType === Node.TEXT_NODE)
-    return normalizeTextNode(node.textContent ?? "");
+  if (node instanceof Text) return normalizeTextNode(node);
   if (!(node instanceof Element)) return "";
 
   if (node.tagName === "BR") return "\n";
@@ -281,9 +330,9 @@ export function slackRichTextToMarkdown(root: Node): string {
 }
 
 export function escapeMarkdownInline(text: string): string {
-  return escapeMarkdownText(text);
+  return escapeMarkdownText(text, false);
 }
 
 export function escapeMarkdownLinkLabel(text: string): string {
-  return escapeMarkdownText(text).replace(/([\[\]])/g, "\\$1");
+  return escapeMarkdownText(text, false).replace(/([\[\]])/g, "\\$1");
 }

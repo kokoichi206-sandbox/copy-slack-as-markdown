@@ -139,8 +139,9 @@ const context = await chromium.launchPersistentContext(
 );
 
 recordAssertion(
-  "生成 Manifest に追加権限を含めない",
-  manifest.permissions === undefined && manifest.host_permissions === undefined,
+  "生成 Manifest の権限を clipboardWrite だけにする",
+  JSON.stringify(manifest.permissions) === JSON.stringify(["clipboardWrite"]) &&
+    manifest.host_permissions === undefined,
 );
 
 try {
@@ -149,6 +150,11 @@ try {
     origin: "https://app.slack.com",
   });
   const page = context.pages()[0] ?? (await context.newPage());
+  const cdpSession = await context.newCDPSession(page);
+  await cdpSession.send("Emulation.setUserAgentOverride", {
+    userAgent: await page.evaluate(() => navigator.userAgent),
+    platform: "MacIntel",
+  });
   page.setDefaultTimeout(10_000);
   page.setDefaultNavigationTimeout(15_000);
   const unexpectedRequests = [];
@@ -262,7 +268,11 @@ try {
     "読めない項目があるスレッドは一部コピーせず失敗を表示する",
     (await page.evaluate(() => navigator.clipboard.readText())) ===
       "thread untouched" &&
-      (await page.locator(".csm-toast--error:not(:empty)").count()) === 1,
+      (await page
+        .locator(
+          '.csm-toast--error:has-text("message author could not be read")',
+        )
+        .count()) === 1,
   );
 
   await page
@@ -712,7 +722,25 @@ try {
   await page.locator("#unreadable-message .csm-copy-message-button").click();
   recordAssertion(
     "単一メッセージを読めないときは失敗トーストを表示する",
-    (await page.locator(".csm-toast--error:not(:empty)").count()) === 1,
+    (await page
+      .locator('.csm-toast--error:has-text("message author could not be read")')
+      .count()) === 1,
+  );
+
+  await cdpSession.send("Emulation.setUserAgentOverride", {
+    userAgent: await page.evaluate(() => navigator.userAgent),
+    platform: "Linux x86_64",
+  });
+  await page.reload({ waitUntil: "commit" });
+  await page.locator("#quote-message").hover();
+  await page.evaluate(() => navigator.clipboard.writeText("untouched"));
+  await page.keyboard.press("Control+Shift+KeyC");
+  recordAssertion(
+    "macOS以外では Ctrl+Shift+C を横取りしない",
+    (await page.evaluate(
+      () =>
+        navigator.platform === "Linux x86_64" && navigator.clipboard.readText(),
+    )) === "untouched",
   );
 
   recordAssertion(

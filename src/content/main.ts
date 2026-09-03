@@ -16,6 +16,7 @@ import {
 const MESSAGE_BUTTON_CLASS = "csm-copy-message-button";
 const THREAD_BUTTON_CLASS = "csm-copy-thread-button";
 const TOAST_CLASS = "csm-toast";
+const IS_MACOS = navigator.platform.startsWith("Mac");
 
 let hoveredMessage: HTMLElement | null = null;
 let scanScheduled = false;
@@ -247,6 +248,7 @@ document.addEventListener(
 );
 
 document.addEventListener("keydown", (event) => {
+  if (!IS_MACOS) return;
   if (
     event.target instanceof Element &&
     event.target.closest(

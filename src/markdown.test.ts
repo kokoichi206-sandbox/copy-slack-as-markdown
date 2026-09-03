@@ -144,6 +144,14 @@ describe("slackRichTextToMarkdown", () => {
   });
 
   it("空白のない引用記号・区切り線・setext 見出しをエスケープする", () => {
-    expect(markdown("&gt;quote<br>---<br>===")).toBe("\\>quote\n\\---\n\\===");
+    expect(markdown("&gt;quote<br>-<br>--<br>---<br>===")).toBe(
+      "\\>quote\n\\-\n\\--\n\\---\n\\===",
+    );
+  });
+
+  it("インライン要素の直後を行頭 Markdown と誤認しない", () => {
+    expect(
+      markdown("<strong>A</strong> = <strong>B</strong> <strong>a</strong>>b"),
+    ).toBe("**A** = **B** **a**>b");
   });
 });
