@@ -13,6 +13,10 @@ function localDate(timestamp: Date): string {
   return `${timestamp.getFullYear()}-${pad(timestamp.getMonth() + 1)}-${pad(timestamp.getDate())}`;
 }
 
+function localTime(timestamp: Date): string {
+  return `${pad(timestamp.getHours())}:${pad(timestamp.getMinutes())}`;
+}
+
 function attachmentMarkdown(message: SlackMessage): string {
   return message.attachments
     .map((attachment) => {
@@ -28,7 +32,7 @@ function attachmentMarkdown(message: SlackMessage): string {
 function timestampLabel(message: SlackMessage, includeDate: boolean): string {
   if (message.timestamp === null) return message.displayedTime;
   return includeDate
-    ? `${localDate(message.timestamp)} ${message.displayedTime}`
+    ? `${localDate(message.timestamp)} ${localTime(message.timestamp)}`
     : message.displayedTime;
 }
 

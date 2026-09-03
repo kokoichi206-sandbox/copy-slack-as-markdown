@@ -27,7 +27,7 @@ describe("slackRichTextToMarkdown", () => {
         <blockquote>quoted<br>next line</blockquote>
       `),
     ).toBe(
-      "- one\n- two\n  - nested\n\n1. first\n2. second\n\n> quoted\n> next line",
+      "- one\n- two\n    - nested\n\n1. first\n2. second\n\n> quoted\n> next line",
     );
   });
 
@@ -72,7 +72,7 @@ describe("slackRichTextToMarkdown", () => {
         <ul data-indent="0"><li>parent</li></ul>
         <ul data-indent="1"><li>child</li></ul>
       `),
-    ).toBe("- parent\n  - child");
+    ).toBe("- parent\n    - child");
   });
 
   it("コードブロック内の空行と行末空白を変えない", () => {
@@ -153,5 +153,23 @@ describe("slackRichTextToMarkdown", () => {
     expect(
       markdown("<strong>A</strong> = <strong>B</strong> <strong>a</strong>>b"),
     ).toBe("**A** = **B** **a**>b");
+  });
+
+  it("番号付きリスト配下の箇条書きを入れ子として字下げする", () => {
+    expect(markdown("<ol><li>parent<ul><li>child</li></ul></li></ol>")).toBe(
+      "1. parent\n    - child",
+    );
+  });
+
+  it("リスト直後のコードブロックとの間を1空行にする", () => {
+    expect(markdown("<ul><li>item</li></ul><pre>code</pre>")).toBe(
+      "- item\n\n```\ncode\n```",
+    );
+  });
+
+  it("打ち消しとして解釈される単一チルダだけをエスケープする", () => {
+    expect(markdown("~100~200 ~/Library ~~old~~")).toBe(
+      "\\~100\\~200 ~/Library \\~\\~old\\~\\~",
+    );
   });
 });

@@ -43,6 +43,23 @@ describe("formatSlackMessages", () => {
     );
   });
 
+  it("日付を付けるときは日付と時刻を同じ Date から整形する", () => {
+    expect(
+      formatSlackMessages([
+        message({
+          timestamp: new Date(2026, 8, 2, 15, 2),
+          displayedTime: "14:02",
+        }),
+        message({
+          timestamp: new Date(2026, 8, 3, 0, 5),
+          displayedTime: "23:05",
+        }),
+      ]),
+    ).toContain(
+      "**alice** · 2026-09-02 15:02\nQuestion\n\n**alice** · 2026-09-03 00:05",
+    );
+  });
+
   it("添付ファイル名と URL を本文の後ろに置く", () => {
     expect(
       formatSlackMessages([

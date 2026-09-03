@@ -20,7 +20,10 @@ const BLOCK_TAGS = new Set([
 function escapeMarkdownText(text: string, atLineStart: boolean): string {
   const escapedInlineText = text
     .replace(/([\\`*_])/g, "\\$1")
-    .replace(/~~/g, "\\~\\~")
+    .replace(
+      /~~(?=\S)([^~\n]*?[^~\s])~~|~(?=\S)([^~\n]*?[^~\s])~/g,
+      (strikethrough) => strikethrough.replaceAll("~", "\\~"),
+    )
     .replace(/</g, "\\<");
   if (!atLineStart) return escapedInlineText;
   return escapedInlineText
@@ -181,7 +184,7 @@ function serializeList(element: Element, context: SerializeContext): string {
     const declaredIndent = element.getAttribute("data-indent");
     const parsedIndent =
       declaredIndent === null ? null : Number(declaredIndent);
-    const indent = "  ".repeat(
+    const indent = "    ".repeat(
       parsedIndent !== null &&
         Number.isInteger(parsedIndent) &&
         parsedIndent >= 0
@@ -317,7 +320,11 @@ function normalizeMarkdown(markdown: string): string {
     normalized += normalizeProseMarkdown(
       markdown.slice(previousEnd, matchIndex),
     );
-    normalized += match[0];
+    const fencedBlock = match[0];
+    normalized +=
+      normalized.endsWith("\n\n") && fencedBlock.startsWith("\n")
+        ? fencedBlock.slice(1)
+        : fencedBlock;
     previousEnd = matchIndex + match[0].length;
   }
 

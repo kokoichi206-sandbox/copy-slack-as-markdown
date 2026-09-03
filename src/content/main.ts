@@ -122,10 +122,11 @@ function showToast(message: string, kind: "success" | "error"): void {
   toastRegions.success.textContent = "";
   toastRegions.error.textContent = "";
   toastRegions[kind].textContent = message;
+  const duration = kind === "error" ? 6000 : 2400;
   toastRemovalTimer = window.setTimeout(() => {
     toastRegions[kind].textContent = "";
     toastRemovalTimer = null;
-  }, 2400);
+  }, duration);
 }
 
 function readableError(error: unknown): string {
@@ -170,7 +171,10 @@ async function copyThreadMessages(
       );
 
     const messages = messageElements.map(extractSlackMessage);
-    await writeMarkdown(formatSlackMessages(messages));
+    await writeMarkdown(
+      formatSlackMessages(messages),
+      `Copied ${messages.length} messages as Markdown`,
+    );
   } catch (error) {
     console.error("[Copy Slack as Markdown] Thread copy failed", error);
     showToast(readableError(error), "error");

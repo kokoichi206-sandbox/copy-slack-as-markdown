@@ -141,7 +141,8 @@ const context = await chromium.launchPersistentContext(
 recordAssertion(
   "生成 Manifest の権限を clipboardWrite だけにする",
   JSON.stringify(manifest.permissions) === JSON.stringify(["clipboardWrite"]) &&
-    manifest.host_permissions === undefined,
+    manifest.host_permissions === undefined &&
+    manifest.minimum_chrome_version === "120",
 );
 
 try {
@@ -247,6 +248,14 @@ try {
   await threadButton.click();
   const threadMarkdown = await page.evaluate(() =>
     navigator.clipboard.readText(),
+  );
+  const threadSuccessToast = page.locator(
+    '.csm-toast--success:has-text("Copied 3 messages as Markdown")',
+  );
+  await threadSuccessToast.waitFor();
+  recordAssertion(
+    "スレッドコピー時にコピーしたメッセージ件数を表示する",
+    (await threadSuccessToast.count()) === 1,
   );
   recordAssertion(
     "開いているスレッドの親と返信だけをまとめてコピーする",

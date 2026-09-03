@@ -1,6 +1,6 @@
 # Copy Slack as Markdown
 
-Slack Web で画面に表示されているメッセージやスレッドを Markdown に変換し、クリップボードへコピーする Chrome 拡張です。Slack API や OAuth は使いません。
+Chrome 120 以降の Slack Web で画面に表示されているメッセージやスレッドを Markdown に変換し、クリップボードへコピーする拡張です。Slack API や OAuth は使いません。
 
 ## インストール
 
