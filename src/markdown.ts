@@ -175,11 +175,14 @@ function listIndentDepth(element: Element, context: SerializeContext): number {
     return Math.min(declaredIndent, context.listDepth);
   }
 
-  const previousIndent = Number(previousList.getAttribute("data-indent"));
+  const previousIndentAttribute = previousList.getAttribute("data-indent");
+  const previousIndent = Number(previousIndentAttribute);
   const maximumIndent =
-    Number.isInteger(previousIndent) && previousIndent >= 0
+    previousIndentAttribute !== null &&
+    Number.isInteger(previousIndent) &&
+    previousIndent >= 0
       ? previousIndent + 1
-      : context.listDepth;
+      : context.listDepth + 1;
   return Math.min(declaredIndent, maximumIndent);
 }
 

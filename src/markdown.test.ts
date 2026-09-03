@@ -85,6 +85,11 @@ describe("slackRichTextToMarkdown", () => {
     expect(markdown('<ul data-indent="2"><li>selected child</li></ul>')).toBe(
       "- selected child",
     );
+    expect(
+      markdown(
+        '<ul><li>root<ul><li>middle</li></ul><ul data-indent="2"><li>deep</li></ul></li></ul>',
+      ),
+    ).toBe("- root\n    - middle\n        - deep");
   });
 
   it("コードブロック内の空行と行末空白を変えない", () => {
