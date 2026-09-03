@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Copy Slack as Markdown — アイコン比較</title>
+    <style>
+      :root {
+        color: #132033;
+        background: #eef2f5;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 48px;
+      }
+
+      header {
+        margin-bottom: 32px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 30px;
+      }
+
+      header p {
+        margin: 0;
+        color: #536174;
+      }
+
+      .candidates {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+      }
+
+      .candidate {
+        position: relative;
+        padding: 28px;
+        border: 3px solid transparent;
+        border-radius: 20px;
+        background: white;
+        box-shadow: 0 8px 24px rgb(25 39 52 / 8%);
+        cursor: pointer;
+      }
+
+      .candidate:has(input:checked) {
+        border-color: #00bfae;
+        box-shadow: 0 12px 32px rgb(0 191 174 / 18%);
+      }
+
+      input {
+        position: absolute;
+        opacity: 0;
+      }
+
+      .heading {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 22px;
+      }
+
+      .letter {
+        display: grid;
+        width: 38px;
+        height: 38px;
+        place-items: center;
+        border-radius: 10px;
+        color: white;
+        background: #081426;
+        font-size: 20px;
+        font-weight: 750;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 20px;
+      }
+
+      .large-preview {
+        display: grid;
+        min-height: 290px;
+        place-items: center;
+        border-radius: 16px;
+        background-color: #f5f7f9;
+        background-image:
+          linear-gradient(45deg, #e5e9ed 25%, transparent 25%),
+          linear-gradient(-45deg, #e5e9ed 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, #e5e9ed 75%),
+          linear-gradient(-45deg, transparent 75%, #e5e9ed 75%);
+        background-position:
+          0 0,
+          0 12px,
+          12px -12px,
+          -12px 0;
+        background-size: 24px 24px;
+      }
+
+      .large-preview img {
+        width: 245px;
+        height: 245px;
+        object-fit: contain;
+      }
+
+      .size-previews {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 14px;
+      }
+
+      .background-preview {
+        display: flex;
+        min-height: 108px;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        border-radius: 12px;
+      }
+
+      .background-preview.light {
+        border: 1px solid #dde3e8;
+        background: white;
+      }
+
+      .background-preview.dark {
+        background: #151b26;
+      }
+
+      .size {
+        display: grid;
+        justify-items: center;
+        gap: 6px;
+        color: #708095;
+        font-size: 11px;
+      }
+
+      .dark .size {
+        color: #aab5c3;
+      }
+
+      .size img {
+        object-fit: contain;
+      }
+
+      .description {
+        margin: 18px 0 0;
+        color: #536174;
+        line-height: 1.6;
+      }
+
+      .selection {
+        position: sticky;
+        bottom: 20px;
+        width: fit-content;
+        margin: 30px auto 0;
+        padding: 12px 20px;
+        border: 1px solid #cbd3dc;
+        border-radius: 999px;
+        background: rgb(255 255 255 / 92%);
+        box-shadow: 0 6px 24px rgb(25 39 52 / 14%);
+        backdrop-filter: blur(8px);
+        font-weight: 700;
+      }
+
+      @media (max-width: 900px) {
+        body {
+          padding: 24px;
+        }
+
+        .candidates {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Copy Slack as Markdown — アイコン比較</h1>
+      <p>
+        カードをクリックして選択できます。特に32pxと16pxでの判別しやすさを比較してください。
+      </p>
+    </header>
+
+    <main class="candidates">
+      <label class="candidate">
+        <input type="radio" name="candidate" value="A" />
+        <div class="heading">
+          <span class="letter">A</span>
+          <h2>Document + Markdown</h2>
+        </div>
+        <div class="large-preview"><img src="a-current.png" alt="候補A" /></div>
+        <div class="size-previews">
+          <div
+            class="background-preview light"
+            data-source="a-current.png"
+          ></div>
+          <div
+            class="background-preview dark"
+            data-source="a-current.png"
+          ></div>
+        </div>
+        <p class="description">
+          文書、変換、Markdownをすべて含む現在案。機能は伝わりやすい一方、要素数は多めです。
+        </p>
+      </label>
+
+      <label class="candidate">
+        <input type="radio" name="candidate" value="B" />
+        <div class="heading">
+          <span class="letter">B</span>
+          <h2>Message + Copy</h2>
+        </div>
+        <div class="large-preview">
+          <img src="b-message-copy.png" alt="候補B" />
+        </div>
+        <div class="size-previews">
+          <div
+            class="background-preview light"
+            data-source="b-message-copy.png"
+          ></div>
+          <div
+            class="background-preview dark"
+            data-source="b-message-copy.png"
+          ></div>
+        </div>
+        <p class="description">
+          メッセージとコピーを前面に出した案。用途は明確ですが、小サイズでは情報量がやや多くなります。
+        </p>
+      </label>
+
+      <label class="candidate">
+        <input type="radio" name="candidate" value="C" />
+        <div class="heading">
+          <span class="letter">C</span>
+          <h2>Hash + Arrow</h2>
+        </div>
+        <div class="large-preview">
+          <img src="c-hash-arrow.png" alt="候補C" />
+        </div>
+        <div class="size-previews">
+          <div
+            class="background-preview light"
+            data-source="c-hash-arrow.png"
+          ></div>
+          <div
+            class="background-preview dark"
+            data-source="c-hash-arrow.png"
+          ></div>
+        </div>
+        <p class="description">
+          Markdownと変換を記号だけで表現した最小案。小サイズで最も形を認識しやすい構成です。
+        </p>
+      </label>
+
+      <label class="candidate">
+        <input type="radio" name="candidate" value="D" />
+        <div class="heading">
+          <span class="letter">D</span>
+          <h2>Selection + MD</h2>
+        </div>
+        <div class="large-preview">
+          <img src="d-selection-md.png" alt="候補D" />
+        </div>
+        <div class="size-previews">
+          <div
+            class="background-preview light"
+            data-source="d-selection-md.png"
+          ></div>
+          <div
+            class="background-preview dark"
+            data-source="d-selection-md.png"
+          ></div>
+        </div>
+        <p class="description">
+          選択範囲のコピーを強調した案。機能固有の印象があり、A/Bより軽量です。
+        </p>
+      </label>
+    </main>
+
+    <div class="selection" id="selection">
+      候補をクリックすると、ここに選択結果が表示されます
+    </div>
+
+    <script>
+      const sizes = [48, 32, 16];
+      for (const preview of document.querySelectorAll("[data-source]")) {
+        for (const size of sizes) {
+          const wrapper = document.createElement("span");
+          wrapper.className = "size";
+          const image = document.createElement("img");
+          image.src = preview.dataset.source;
+          image.width = size;
+          image.height = size;
+          image.alt = `${size}px preview`;
+          const label = document.createElement("span");
+          label.textContent = `${size}px`;
+          wrapper.append(image, label);
+          preview.append(wrapper);
+        }
+      }
+
+      document.addEventListener("change", (event) => {
+        if (!(event.target instanceof HTMLInputElement)) return;
+        document.querySelector("#selection").textContent =
+          `選択中: ${event.target.value}案`;
+      });
+    </script>
+  </body>
+</html>
