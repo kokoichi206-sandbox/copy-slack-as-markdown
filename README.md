@@ -55,6 +55,8 @@ The `clipboardWrite` permission is used only when you activate the `MD` button o
 
 The extension does not send data to external servers, collect analytics, or log message contents. All conversion runs locally in the browser.
 
+See the [Privacy Policy](./PRIVACY.md) for details.
+
 ## Development
 
 ```sh
